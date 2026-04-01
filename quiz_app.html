@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuizMind — Test Your Knowledge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #fdf6ee;
+      --surface: #ffffff;
+      --card: #fffaf4;
+      --dark: #1e1a14;
+      --mid: #6b5f4e;
+      --muted: #a89880;
+      --border: #ecddc8;
+      --accent: #e8672a;
+      --accent-soft: rgba(232,103,42,0.1);
+      --accent2: #2a9de8;
+      --accent2-soft: rgba(42,157,232,0.1);
+      --green: #27a06e;
+      --green-soft: rgba(39,160,110,0.1);
+      --red: #e83a2a;
+      --red-soft: rgba(232,58,42,0.1);
+      --shadow: 0 8px 40px rgba(30,26,20,0.1);
+      --shadow-sm: 0 2px 12px rgba(30,26,20,0.07);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--dark);
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── DECORATIVE BACKGROUND ── */
+    .bg-deco {
+      position: fixed; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .bg-circle {
+      position: absolute; border-radius: 50%;
+    }
+    .bg-c1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(232,103,42,0.08), transparent 70%);
+      top: -150px; right: -150px;
+    }
+    .bg-c2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(42,157,232,0.07), transparent 70%);
+      bottom: -100px; left: -100px;
+    }
+    .bg-c3 {
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(39,160,110,0.06), transparent 70%);
+      top: 40%; left: 5%;
+    }
+
+    /* ── MAIN CONTAINER ── */
+    .container {
+      width: 100%; max-width: 580px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── SCREENS ── */
+    .screen { display: none; }
+    .screen.active { display: block; animation: fadeIn 0.5s ease both; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── WELCOME SCREEN ── */
+    .welcome-card {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .welcome-icon {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, var(--accent), #f0943a);
+      border-radius: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 1.8rem;
+      box-shadow: 0 8px 25px rgba(232,103,42,0.3);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .welcome-tag {
+      display: inline-block;
+      font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); font-weight: 700;
+      background: var(--accent-soft);
+      padding: 0.3rem 0.9rem; border-radius: 50px;
+      margin-bottom: 1rem;
+    }
+
+    .welcome-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 700; line-height: 1.1;
+      letter-spacing: -0.02em; margin-bottom: 1rem;
+    }
+    .welcome-title em { font-style: italic; color: var(--accent); }
+
+    .welcome-desc {
+      font-size: 0.95rem; color: var(--mid);
+      line-height: 1.8; max-width: 380px;
+      margin: 0 auto 2rem;
+    }
+
+    .info-pills {
+      display: flex; justify-content: center; gap: 1rem;
+      flex-wrap: wrap; margin-bottom: 2rem;
+    }
+    .info-pill {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; color: var(--mid);
+      background: var(--card); border: 1px solid var(--border);
+      padding: 0.45rem 1rem; border-radius: 50px;
+    }
+
+    .start-btn {
+      width: 100%; max-width: 280px;
+      padding: 1.1rem 2rem;
+      background: linear-gradient(135deg, var(--accent), #f0943a);
+      color: #fff; border: none; border-radius: 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.02em;
+      transition: all 0.3s;
+      box-shadow: 0 6px 20px rgba(232,103,42,0.35);
+    }
+    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,103,42,0.45); }
+    .start-btn:active { transform: scale(0.98); }
+
+    /* ── QUIZ SCREEN ── */
+    .quiz-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .q-counter {
+      font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .q-counter span { color: var(--accent); }
+
+    .score-badge {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 700;
+      color: var(--green);
+      background: var(--green-soft);
+      padding: 0.4rem 0.9rem; border-radius: 50px;
+    }
+
+    /* Progress bar */
+    .progress-wrap { margin-bottom: 1.8rem; }
+    .progress-bg {
+      width: 100%; height: 6px;
+      background: var(--border); border-radius: 10px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #f0943a);
+      border-radius: 10px;
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* Question card */
+    .question-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem 2rem 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.2rem;
+    }
+
+    .q-number-tag {
+      font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); font-weight: 700;
+      background: var(--accent-soft);
+      padding: 0.25rem 0.7rem; border-radius: 50px;
+      display: inline-block; margin-bottom: 1rem;
+    }
+
+    .question-text {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(1.1rem, 3vw, 1.35rem);
+      font-weight: 600; line-height: 1.4;
+      color: var(--dark);
+    }
+
+    /* Options */
+    .options-grid {
+      display: flex; flex-direction: column; gap: 0.7rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .option-btn {
+      width: 100%; padding: 1rem 1.2rem;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      display: flex; align-items: center; gap: 1rem;
+      cursor: pointer; text-align: left;
+      transition: all 0.2s;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.92rem; font-weight: 500;
+      color: var(--dark);
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: translateX(4px);
+    }
+    .option-btn:disabled { cursor: default; }
+
+    .option-letter {
+      width: 32px; height: 32px; flex-shrink: 0;
+      border-radius: 8px;
+      background: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 800;
+      color: var(--mid);
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+    }
+
+    /* States */
+    .option-btn.selected {
+      border-color: var(--accent2);
+      background: var(--accent2-soft);
+    }
+    .option-btn.selected .option-letter {
+      background: var(--accent2); color: #fff;
+    }
+    .option-btn.correct {
+      border-color: var(--green);
+      background: var(--green-soft);
+    }
+    .option-btn.correct .option-letter {
+      background: var(--green); color: #fff;
+    }
+    .option-btn.wrong {
+      border-color: var(--red);
+      background: var(--red-soft);
+    }
+    .option-btn.wrong .option-letter {
+      background: var(--red); color: #fff;
+    }
+
+    /* Feedback banner */
+    .feedback-banner {
+      padding: 0.8rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.85rem; font-weight: 600;
+      display: none; align-items: center; gap: 0.6rem;
+      margin-bottom: 1.2rem;
+      animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .feedback-banner.show { display: flex; }
+    .feedback-banner.correct-fb { background: var(--green-soft); color: var(--green); border: 1px solid rgba(39,160,110,0.2); }
+    .feedback-banner.wrong-fb { background: var(--red-soft); color: var(--red); border: 1px solid rgba(232,58,42,0.2); }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Navigation */
+    .nav-btns { display: flex; gap: 0.8rem; }
+
+    .btn-next {
+      flex: 1; padding: 1rem;
+      background: linear-gradient(135deg, var(--accent), #f0943a);
+      color: #fff; border: none; border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(232,103,42,0.3);
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(232,103,42,0.4); }
+    .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ── RESULT SCREEN ── */
+    .result-card {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .result-icon {
+      font-size: 4rem; margin-bottom: 1rem;
+      animation: bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes bounce {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .result-tag {
+      display: inline-block;
+      font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+      font-weight: 700; padding: 0.3rem 0.9rem;
+      border-radius: 50px; margin-bottom: 1rem;
+    }
+    .tag-excellent { background: rgba(39,160,110,0.1); color: var(--green); }
+    .tag-good { background: rgba(42,157,232,0.1); color: var(--accent2); }
+    .tag-fair { background: rgba(232,103,42,0.1); color: var(--accent); }
+    .tag-retry { background: rgba(232,58,42,0.1); color: var(--red); }
+
+    .thankyou-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(1.8rem, 5vw, 2.4rem);
+      font-weight: 700; line-height: 1.15;
+      letter-spacing: -0.02em; margin-bottom: 0.6rem;
+    }
+    .thankyou-title em { font-style: italic; color: var(--accent); }
+
+    .thankyou-msg {
+      font-size: 0.92rem; color: var(--mid);
+      line-height: 1.7; margin-bottom: 2rem;
+      max-width: 360px; margin-left: auto; margin-right: auto;
+    }
+
+    /* Score display */
+    .score-display {
+      background: linear-gradient(135deg, var(--accent), #f0943a);
+      border-radius: 20px;
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .score-display::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .score-num {
+      font-family: 'Fraunces', serif;
+      font-size: 4rem; font-weight: 700;
+      line-height: 1; position: relative;
+    }
+    .score-num span { font-size: 1.5rem; opacity: 0.7; }
+    .score-label { font-size: 0.85rem; opacity: 0.85; margin-top: 0.3rem; position: relative; }
+
+    /* Stats row */
+    .stats-row {
+      display: flex; gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-box {
+      flex: 1; padding: 1rem;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; text-align: center;
+    }
+    .stat-box-num {
+      font-family: 'Fraunces', serif;
+      font-size: 1.6rem; font-weight: 600; line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .stat-box-num.c { color: var(--green); }
+    .stat-box-num.w { color: var(--red); }
+    .stat-box-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    .restart-btn {
+      width: 100%; padding: 1.1rem;
+      background: var(--dark); color: #fff;
+      border: none; border-radius: 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+    }
+    .restart-btn:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 22px rgba(232,103,42,0.3); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      .welcome-card, .question-card, .result-card { padding: 1.8rem 1.4rem; }
+      .stats-row { gap: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-deco">
+    <div class="bg-circle bg-c1"></div>
+    <div class="bg-circle bg-c2"></div>
+    <div class="bg-circle bg-c3"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- ── WELCOME SCREEN ── -->
+    <div class="screen active" id="welcomeScreen">
+      <div class="welcome-card">
+        <div class="welcome-icon">🧠</div>
+        <div class="welcome-tag">Knowledge Check</div>
+        <h1 class="welcome-title">Ready to test your <em>knowledge?</em></h1>
+        <p class="welcome-desc">A quick quiz covering Computer Science & Web fundamentals. Answer all questions to see your final score!</p>
+        <div class="info-pills">
+          <div class="info-pill">📋 6 Questions</div>
+          <div class="info-pill">⚡ Multiple Choice</div>
+          <div class="info-pill">🏆 Instant Results</div>
+        </div>
+        <button class="start-btn" onclick="startQuiz()">Start Quiz →</button>
+      </div>
+    </div>
+
+    <!-- ── QUIZ SCREEN ── -->
+    <div class="screen" id="quizScreen">
+      <div class="quiz-header">
+        <div class="q-counter">Question <span id="qNum">1</span> of 6</div>
+        <div class="score-badge">⭐ <span id="liveScore">0</span> correct</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bg">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="q-number-tag" id="qTag">Q1</div>
+        <div class="question-text" id="questionText"></div>
+      </div>
+
+      <div class="options-grid" id="optionsGrid"></div>
+
+      <div class="feedback-banner" id="feedbackBanner"></div>
+
+      <div class="nav-btns">
+        <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>
+          <span id="nextBtnText">Next Question</span> <span>→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── RESULT SCREEN ── -->
+    <div class="screen" id="resultScreen">
+      <div class="result-card">
+        <div class="result-icon" id="resultIcon">🎉</div>
+        <div class="result-tag" id="resultTag">Excellent!</div>
+        <h2 class="thankyou-title" id="resultTitle">Well <em>done!</em></h2>
+        <p class="thankyou-msg" id="resultMsg"></p>
+
+        <div class="score-display">
+          <div class="score-num" id="scoreNum">0 <span>/ 6</span></div>
+          <div class="score-label">Your Final Score</div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-box-num c" id="correctCount">0</div>
+            <div class="stat-box-label">✅ Correct</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-num w" id="wrongCount">0</div>
+            <div class="stat-box-label">❌ Wrong</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-num" id="pctCount" style="color:var(--accent)">0%</div>
+            <div class="stat-box-label">🎯 Accuracy</div>
+          </div>
+        </div>
+
+        <button class="restart-btn" onclick="restartQuiz()">🔄 Try Again</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── QUESTIONS DATA ──
+    const questions = [
+      {
+        question: "What does HTML stand for?",
+        options: [
+          "Hyper Text Markup Language",
+          "High Tech Modern Language",
+          "Hyper Transfer Markup Logic",
+          "Home Tool Markup Language"
+        ],
+        correct: 0
+      },
+      {
+        question: "Who is making the Web standards?",
+        options: [
+          "Microsoft",
+          "The World Wide Web Consortium",
+          "Google",
+          "Mozilla"
+        ],
+        correct: 1
+      },
+      {
+        question: "The smallest unit of storage is?",
+        options: [
+          "Bug",
+          "Nibble",
+          "Byte",
+          "Bit"
+        ],
+        correct: 3
+      },
+      {
+        question: "Computer is an?",
+        options: [
+          "Mechanical Device",
+          "Electronic Device",
+          "Battery",
+          "Binary Device"
+        ],
+        correct: 1
+      },
+      {
+        question: "Which one is an Input Device?",
+        options: [
+          "Speaker",
+          "Printer",
+          "Keyboard",
+          "Monitor"
+        ],
+        correct: 2
+      },
+      {
+        question: "What does MB stand for?",
+        options: [
+          "Mini Byte",
+          "Mega Byte",
+          "Make or Break",
+          "None of the above"
+        ],
+        correct: 1
+      }
+    ];
+
+    // ── STATE ──
+    let currentQ = 0;
+    let score = 0;
+    let answered = false;
+    const letters = ['A', 'B', 'C', 'D'];
+
+    // ── START ──
+    function startQuiz() {
+      currentQ = 0;
+      score = 0;
+      answered = false;
+      showScreen('quizScreen');
+      loadQuestion();
+    }
+
+    // ── SHOW SCREEN ──
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // ── LOAD QUESTION ──
+    function loadQuestion() {
+      answered = false;
+      const q = questions[currentQ];
+      const total = questions.length;
+
+      // Header
+      document.getElementById('qNum').textContent = currentQ + 1;
+      document.getElementById('liveScore').textContent = score;
+      document.getElementById('qTag').textContent = `Q${currentQ + 1}`;
+      document.getElementById('questionText').textContent = q.question;
+
+      // Progress
+      const pct = (currentQ / total) * 100;
+      document.getElementById('progressFill').style.width = pct + '%';
+
+      // Next btn
+      const nextBtn = document.getElementById('nextBtn');
+      nextBtn.disabled = true;
+      document.getElementById('nextBtnText').textContent =
+        currentQ === total - 1 ? 'Submit Quiz' : 'Next Question';
+
+      // Feedback
+      const fb = document.getElementById('feedbackBanner');
+      fb.className = 'feedback-banner';
+      fb.textContent = '';
+
+      // Options
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${opt}</span>`;
+        btn.onclick = () => selectOption(i, btn);
+        grid.appendChild(btn);
+      });
+    }
+
+    // ── SELECT OPTION ──
+    function selectOption(index, btn) {
+      if (answered) return;
+      answered = true;
+
+      const q = questions[currentQ];
+      const allBtns = document.querySelectorAll('.option-btn');
+      const fb = document.getElementById('feedbackBanner');
+
+      // Disable all
+      allBtns.forEach(b => b.disabled = true);
+
+      if (index === q.correct) {
+        btn.classList.add('correct');
+        score++;
+        document.getElementById('liveScore').textContent = score;
+        fb.className = 'feedback-banner correct-fb show';
+        fb.innerHTML = '✅ Correct! Well done!';
+      } else {
+        btn.classList.add('wrong');
+        allBtns[q.correct].classList.add('correct');
+        fb.className = 'feedback-banner wrong-fb show';
+        fb.innerHTML = `❌ Incorrect! The correct answer was <strong>${letters[q.correct]}) ${q.options[q.correct]}</strong>`;
+      }
+
+      document.getElementById('nextBtn').disabled = false;
+    }
+
+    // ── NEXT QUESTION ──
+    function nextQuestion() {
+      currentQ++;
+      if (currentQ < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    // ── SHOW RESULTS ──
+    function showResults() {
+      const total = questions.length;
+      const pct = Math.round((score / total) * 100);
+      const wrong = total - score;
+
+      document.getElementById('scoreNum').innerHTML = `${score} <span>/ ${total}</span>`;
+      document.getElementById('correctCount').textContent = score;
+      document.getElementById('wrongCount').textContent = wrong;
+      document.getElementById('pctCount').textContent = pct + '%';
+
+      // Dynamic message based on score
+      let icon, tagClass, tagText, title, msg;
+
+      if (pct === 100) {
+        icon = '🏆'; tagClass = 'tag-excellent'; tagText = 'Perfect Score!';
+        title = 'Outstanding <em>performance!</em>';
+        msg = 'You got every single question right! You have an excellent understanding of Computer Science & Web fundamentals. Thank you for taking the quiz!';
+      } else if (pct >= 70) {
+        icon = '🎉'; tagClass = 'tag-excellent'; tagText = 'Excellent!';
+        title = 'Well <em>done!</em>';
+        msg = 'Great job! You have a strong grasp of the concepts. Keep up the fantastic work and keep learning. Thank you for taking the quiz!';
+      } else if (pct >= 50) {
+        icon = '👍'; tagClass = 'tag-good'; tagText = 'Good Effort!';
+        title = 'Not <em>bad!</em>';
+        msg = 'You\'re on the right track! A little more practice and you\'ll ace it next time. Thank you for taking the quiz!';
+      } else if (pct >= 30) {
+        icon = '💪'; tagClass = 'tag-fair'; tagText = 'Keep Trying!';
+        title = 'Keep <em>going!</em>';
+        msg = 'Don\'t give up! Every expert was once a beginner. Review the topics and give it another shot. Thank you for taking the quiz!';
+      } else {
+        icon = '📚'; tagClass = 'tag-retry'; tagText = 'Need More Practice';
+        title = 'Time to <em>study!</em>';
+        msg = 'Don\'t worry — learning takes time. Review the fundamentals and try again, you\'ll do better! Thank you for taking the quiz!';
+      }
+
+      document.getElementById('resultIcon').textContent = icon;
+      document.getElementById('resultTag').className = `result-tag ${tagClass}`;
+      document.getElementById('resultTag').textContent = tagText;
+      document.getElementById('resultTitle').innerHTML = title;
+      document.getElementById('resultMsg').textContent = msg;
+
+      showScreen('resultScreen');
+    }
+
+    // ── RESTART ──
+    function restartQuiz() {
+      currentQ = 0;
+      score = 0;
+      answered = false;
+      showScreen('welcomeScreen');
+    }
+  </script>
+
+</body>
+</html>
